@@ -1,5 +1,5 @@
-# To run the server: 
-#   uvicorn app:app --reload
+# To run the server (from the directory containing the app.py file): 
+#   poetry run uvicorn app:app --reload
 
 # uvicorn - ASGI web server (https://www.uvicorn.org/).
 # --reload - automatically reload app after each change.
