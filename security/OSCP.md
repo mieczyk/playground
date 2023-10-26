@@ -18,6 +18,7 @@
 	- **Pre-engagement interactions** - determining a testing scope is crucial.
 	- **Intelligence gathering** - ...
 	- [Technical Guide](http://www.pentest-standard.org/index.php/PTES_Technical_Guidelines) - when we combine this supplement's info with the standard, we've got a comprehensive plan for penetration testing.
+	- Updated to version 2 (still in progress): http://pentest-standard.com/.
 
 ---
 TODO:
