@@ -2,7 +2,7 @@
 
 Proof of concept based on the [Building Custom Middleware in FastAPI](https://semaphoreci.com/blog/custom-middleware-fastapi) article.
 
-## Summary
+## TLDR
 
 FastAPI built-in middleware components:
 - **CORSMiddleware** - includes CORS headers in responses.
@@ -10,5 +10,7 @@ FastAPI built-in middleware components:
 - **SessionMiddleware** - signed cookie-based session.
 - **GZip Middleware** - helps to reduce bandwidth usage by compressing response payloads.
 
+A `Request` has a `request.scope` attribute, that's just a Python `dict` containing the metadata related to the request.
+
 # TODO:
-Problem to resolve: `ModuleNotFoundError: No module named 'fastapi'`
+- Add timestamp as a valid query parameter.
