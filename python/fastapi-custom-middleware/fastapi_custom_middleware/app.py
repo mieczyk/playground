@@ -20,7 +20,7 @@ async def info_v2():
 
 def add_timestamp_param_to_request(request: Request, timestamp: int):
     timestamp_param = b"timestamp=" + str(timestamp).encode()
-    if  query_string := request.scope["query_string"]:
+    if query_string := request.scope["query_string"]:
         request.scope["query_string"] = query_string + b"&" + timestamp_param
     else:
         request.scope["query_string"] = timestamp_param
