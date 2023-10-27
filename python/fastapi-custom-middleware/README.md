@@ -13,4 +13,4 @@ FastAPI built-in middleware components:
 A `Request` has a `request.scope` attribute, that's just a Python `dict` containing the metadata related to the request.
 
 # TODO:
-- Add timestamp as a valid query parameter.
+- Paragraph: *Class-based middleware: Implementing Rate-Limiting*

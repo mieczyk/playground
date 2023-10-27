@@ -6,25 +6,24 @@
 import time
 from fastapi import FastAPI, Request
 from fastapi.responses import StreamingResponse
-from starlette.datastructures import URL
 
 app = FastAPI()
 
 # Returns a "JSONResponse" object.
 @app.get("/info")
-async def info(timestamp: float = None):
-    return { "msg": "My first FastAPI application" }
+async def info(timestamp: int = None):
+    return { "msg": f"My first FastAPI application: {timestamp}" }
 
 @app.get("/v2/info")
 async def info_v2():
     return { "msg": "Version 2 of my first application" }
 
-def add_timestamp_param_to_request_url(request: Request, timestamp: int):
-    parsed_url = URL(request.url)
-    query_paramas = parsed_url.query_params
-    query_paramas
-    
-    request.url = parsed_url
+def add_timestamp_param_to_request(request: Request, timestamp: int):
+    timestamp_param = b"timestamp=" + str(timestamp).encode()
+    if  query_string := request.scope["query_string"]:
+        request.scope["query_string"] = query_string + b"&" + timestamp_param
+    else:
+        request.scope["query_string"] = timestamp_param
 
 # Function-based middleware definition.
 # `request` = all information associated with the incoming request.
@@ -38,7 +37,7 @@ async def set_timestamp_on_request_and_response(request: Request, call_next):
     # Add timestamp to the request.
     if not given_timestamp:
         given_timestamp = int(time.time())
-        add_timestamp_param_to_request_url(request, given_timestamp)
+        add_timestamp_param_to_request(request, given_timestamp)
 
     # Process the modified request and intercept the response
     response = await call_next(request)
