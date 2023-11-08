@@ -4,8 +4,10 @@
 # uvicorn - ASGI web server (https://www.uvicorn.org/).
 # --reload - automatically reload app after each change.
 import time
+from datetime import datetime, timedelta
 from fastapi import FastAPI, Request
 from fastapi.responses import StreamingResponse
+from starlette.middleware.base import BaseHTTPMiddleware
 
 app = FastAPI()
 
@@ -47,3 +49,15 @@ async def set_timestamp_on_request_and_response(request: Request, call_next):
         response.headers["X-Timestamp"] = str(given_timestamp)
 
     return response
+
+# Class-based middleware responsible for rate limiting.
+# It checks how many requests have been made from a sepific IP within a specific period
+# and rejects further requests if the limit is exceeded.
+class RateLimitMiddleware(BaseHTTPMiddleware):
+    # Allow max 3 requests per second.
+    RATE_LIMIT_DURATION = timedelta(seconds=1)
+    RATE_TIMIT_REQUESTS = 3
+
+    def __init__(self, app):
+        super().__init__(app)
+        self.requests_count = {}

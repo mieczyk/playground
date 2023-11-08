@@ -1,6 +1,7 @@
 # Overview
 
 Proof of concept based on the [Building Custom Middleware in FastAPI](https://semaphoreci.com/blog/custom-middleware-fastapi) article.
+It shows how to build custom middleware (both function-based and class-based) and use it to modify requests and responses.
 
 ## TLDR
 
