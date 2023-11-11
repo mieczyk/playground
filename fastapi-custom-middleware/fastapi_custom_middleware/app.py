@@ -6,7 +6,8 @@
 import time
 from datetime import datetime, timedelta
 from fastapi import FastAPI, Request
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, JSONResponse
+from http import HTTPStatus
 from starlette.middleware.base import BaseHTTPMiddleware
 
 app = FastAPI()
@@ -56,8 +57,39 @@ async def set_timestamp_on_request_and_response(request: Request, call_next):
 class RateLimitMiddleware(BaseHTTPMiddleware):
     # Allow max 3 requests per second.
     RATE_LIMIT_DURATION = timedelta(seconds=1)
-    RATE_TIMIT_REQUESTS = 3
+    RATE_LIMIT_REQUESTS = 3
 
+    # Provide middleware configration here.
     def __init__(self, app):
         super().__init__(app)
-        self.requests_count = {}
+        self.request_counts = {}    # Stores requests count for each IP.
+
+    # Middleware logic goes here.
+    async def dispatch(self, request, call_next):
+        
+        client_ip = request.client.host
+
+        request_count, last_request = self.request_counts.get(client_ip, (0, datetime.min))
+
+        elapsed_time = datetime.now() - last_request
+
+        if elapsed_time > self.RATE_LIMIT_DURATION:
+            request_count = 1
+        else:
+            if request_count >= self.RATE_LIMIT_REQUESTS:
+                return JSONResponse(
+                    status_code=HTTPStatus.TOO_MANY_REQUESTS,   # 429
+                    content={"message": "Rate limit exceeded. Please try again later."}
+                )
+            request_count += 1
+
+
+        self.request_counts[client_ip] = (request_count, datetime.now())
+
+        response = await call_next(request)
+
+        return response
+
+# Register custom class-based middleware. 
+# Will be executed afer `set_timestamp_on_request_and_response`.
+app.add_middleware(RateLimitMiddleware)

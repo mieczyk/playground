@@ -12,6 +12,3 @@ FastAPI built-in middleware components:
 - **GZip Middleware** - helps to reduce bandwidth usage by compressing response payloads.
 
 A `Request` has a `request.scope` attribute, that's just a Python `dict` containing the metadata related to the request.
-
-# TODO:
-- Paragraph: *Class-based middleware: Implementing Rate-Limiting*
