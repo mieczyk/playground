@@ -1,25 +1,29 @@
-# To run the server (from the directory containing the app.py file): 
+# To run the server (from the directory containing the app.py file):
 #   poetry run uvicorn app:app --reload
 
 # uvicorn - ASGI web server (https://www.uvicorn.org/).
 # --reload - automatically reload app after each change.
 import time
 from datetime import datetime, timedelta
-from fastapi import FastAPI, Request
-from fastapi.responses import StreamingResponse, JSONResponse
 from http import HTTPStatus
+
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse, StreamingResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 
 app = FastAPI()
 
+
 # Returns a "JSONResponse" object.
 @app.get("/info")
 async def info(timestamp: int = None):
-    return { "msg": f"My first FastAPI application: {timestamp}" }
+    return {"msg": f"My first FastAPI application: {timestamp}"}
+
 
 @app.get("/v2/info")
 async def info_v2():
-    return { "msg": "Version 2 of my first application" }
+    return {"msg": "Version 2 of my first application"}
+
 
 def add_timestamp_param_to_request(request: Request, timestamp: int):
     timestamp_param = b"timestamp=" + str(timestamp).encode()
@@ -28,25 +32,28 @@ def add_timestamp_param_to_request(request: Request, timestamp: int):
     else:
         request.scope["query_string"] = timestamp_param
 
+
 # Class-based middleware responsible for rate limiting.
 # It checks how many requests have been made from a sepific IP within a specific period
 # and rejects further requests if the limit is exceeded.
 class RateLimitMiddleware(BaseHTTPMiddleware):
-    # Allow max 3 requests per second.
+    # Allow max 10 requests per second.
     RATE_LIMIT_DURATION = timedelta(seconds=1)
-    RATE_LIMIT_REQUESTS = 3
+    RATE_LIMIT_REQUESTS = 10
 
     # Provide middleware configration here.
     def __init__(self, app):
         super().__init__(app)
-        self.request_counts = {}    # Stores requests count for each IP.
+        self.request_counts = {}  # Stores requests count for each IP.
 
     # Middleware logic goes here.
     async def dispatch(self, request, call_next):
         print("REQUEST: RateLimitMiddleware")
         client_ip = request.client.host
 
-        request_count, last_request = self.request_counts.get(client_ip, (0, datetime.min))
+        request_count, last_request = self.request_counts.get(
+            client_ip, (0, datetime.min)
+        )
 
         elapsed_time = datetime.now() - last_request
 
@@ -55,8 +62,8 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         else:
             if request_count >= self.RATE_LIMIT_REQUESTS:
                 return JSONResponse(
-                    status_code=HTTPStatus.TOO_MANY_REQUESTS,   # 429
-                    content={"message": "Rate limit exceeded. Please try again later."}
+                    status_code=HTTPStatus.TOO_MANY_REQUESTS,  # 429
+                    content={"message": "Rate limit exceeded. Please try again later."},
                 )
             request_count += 1
 
@@ -67,6 +74,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         print("RESPONSE: RateLimitMiddleware")
 
         return response
+
 
 # Function-based middleware definition.
 # `request` = all information associated with the incoming request.
@@ -95,12 +103,14 @@ async def set_timestamp_on_request_and_response(request: Request, call_next):
 
     return response
 
+
 @app.middleware("http")
 async def another_middleware_function(request: Request, call_next):
     print("REQUEST: another_middleware_function")
     response = await call_next(request)
     print("RESPONSE: another_middleware_function")
     return response
+
 
 # Register custom class-based middleware.
 app.add_middleware(RateLimitMiddleware)
