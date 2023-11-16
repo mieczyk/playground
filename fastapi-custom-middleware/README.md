@@ -13,7 +13,11 @@ FastAPI built-in middleware components:
 
 A `Request` has a `request.scope` attribute, that's just a Python `dict` containing the metadata related to the request.
 
-Middleware components are executed in the order they are registered and the registration order is reversed compared to how we define them.
-In other words: **the last function/class registered is the first one to run and handle a request** (responses are handled in the reverse order, of course).
+Middleware components are executed in the order they are registered and the registration order is reversed compared to how we define them. In other words: **the last function/class registered is the first one to run and handle a request** (responses are handled in the reverse order, of course).
 
 In order to test FastAPI endpoints, the built-in `fastapi.testclient.TestClient` class can be used.
+
+Things that should be kept in mind while using middleware components:
+- Middleware should lightweight as it's executed before each request and after each response.
+- Middleware components order matter.
+- Keep middleware documentation up-to-date, so handling requests/responses doesn't look like a magic for newcomers. 

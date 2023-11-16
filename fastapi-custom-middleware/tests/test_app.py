@@ -1,5 +1,4 @@
 import time
-
 from http import HTTPStatus
 from unittest import mock
 
@@ -33,11 +32,11 @@ def test_add_current_timestamp_to_each_request_if_missing():
 
 def test_rate_limiting_middleware():
     # Make sure requests from previous tests won't be taken into rate limit calculations.
-    time.sleep(1) 
+    time.sleep(1)
 
     for _ in range(0, 10):
         response = client.get(ENDPOINTS[0])
         assert response.status_code == HTTPStatus.OK
-    
+
     response = client.get(ENDPOINTS[0])
     assert response.status_code == HTTPStatus.TOO_MANY_REQUESTS
