@@ -24,4 +24,36 @@ How to apply custom logging configuration to Uvicorn: [FastAPI and Uvicorn Loggi
 
 # PoC
 
+## API endpoints
+
+Very simple FastAPI application that demonstrates custom middleware's behavior. It exposes only two endpoints that do nothing except returning a JSON formatted message:
+- `/info`
+- `/v2/info`
+
+## Middleware
+
+- `RateLimitMiddleware` - class-based middleware definition responsible for rate limiting (max 10 requests per second).
+- `set_timestamp_on_request_and_response` - function-based middleware that automatically adds current timestamp to each request as a query parameter and adds the same timestamp to each response as a HTTP header (`X-Timestamp`).
+- `another_middleware_function` - function-based middleware that does nothing. Its purpose is to show the middleware components' execution order.
+
 ## Setup
+
+Install all required dependencies:
+
+```
+poetry install
+```
+
+Run the server (from the directory containing the this README file):
+
+```
+poetry run uvicorn fastapi_custom_middleware.app:app --reload --log-config=logging.yml
+```
+
+`--reload` option automatically reloads the app after each change.
+
+Run the tests:
+
+```
+poetry run pytest tests/
+```

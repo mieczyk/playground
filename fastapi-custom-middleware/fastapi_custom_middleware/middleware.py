@@ -18,7 +18,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
     RATE_LIMIT_DURATION = timedelta(seconds=1)
     RATE_LIMIT_REQUESTS = 10
 
-    # Provide middleware configration here.
+    # Provide middleware configuration here.
     def __init__(self, app):
         super().__init__(app)
         self.request_counts = {}  # Stores requests count for each IP.

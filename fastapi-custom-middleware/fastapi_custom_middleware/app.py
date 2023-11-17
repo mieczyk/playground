@@ -1,9 +1,3 @@
-# To run the server (from the directory containing the app.py file):
-#   poetry run uvicorn app:app --reload
-
-# uvicorn - ASGI web server (https://www.uvicorn.org/).
-# --reload - automatically reload app after each change.
-
 from fastapi import FastAPI
 
 from fastapi_custom_middleware.middleware import (
