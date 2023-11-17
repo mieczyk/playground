@@ -1,3 +1,4 @@
+import logging
 import time
 from datetime import datetime, timedelta
 from http import HTTPStatus
@@ -5,6 +6,8 @@ from http import HTTPStatus
 from fastapi import Request
 from fastapi.responses import JSONResponse, StreamingResponse
 from starlette.middleware.base import BaseHTTPMiddleware
+
+logger = logging.getLogger(__name__)
 
 
 # Class-based middleware responsible for rate limiting.
@@ -22,7 +25,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
 
     # Middleware logic goes here.
     async def dispatch(self, request, call_next):
-        print("REQUEST: RateLimitMiddleware")
+        logger.info("RateLimitMiddleware: REQUEST")
         client_ip = request.client.host
 
         request_count, last_request = self.request_counts.get(
@@ -45,7 +48,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
 
         response = await call_next(request)
 
-        print("RESPONSE: RateLimitMiddleware")
+        logger.info("RateLimitMiddleware: RESPONSE")
 
         return response
 
@@ -56,7 +59,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
 # It has an access to the incoming request (by the `request` param) and to
 # the outgoing response (returned by the `call_next` function).
 async def set_timestamp_on_request_and_response(request: Request, call_next):
-    print("REQUEST: set_timestamp_on_request_and_response")
+    logger.info("set_timestamp_on_request_and_response: REQUEST")
     given_timestamp = request.query_params.get("timestamp")
 
     # Add timestamp to the request.
@@ -68,7 +71,7 @@ async def set_timestamp_on_request_and_response(request: Request, call_next):
     # It actually delegates the processing to the next middleware in the chain.
     response = await call_next(request)
 
-    print("RESPONSE: set_timestamp_on_request_and_response")
+    logger.info("set_timestamp_on_request_and_response: RESPONSE")
 
     # Add custom header to the response
     if isinstance(response, StreamingResponse):
@@ -86,7 +89,7 @@ def __add_timestamp_param_to_request(request: Request, timestamp: int):
 
 
 async def another_middleware_function(request: Request, call_next):
-    print("REQUEST: another_middleware_function")
+    logger.info("another_middleware_function: REQUEST")
     response = await call_next(request)
-    print("RESPONSE: another_middleware_function")
+    logger.info("another_middleware_function: RESPONSE")
     return response

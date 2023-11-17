@@ -1,9 +1,7 @@
-# Overview
-
 Proof of concept based on the [Building Custom Middleware in FastAPI](https://semaphoreci.com/blog/custom-middleware-fastapi) article.
 It shows how to build custom middleware (both function-based and class-based) and use it to modify requests and responses.
 
-## TLDR
+# TLDR
 
 FastAPI built-in middleware components:
 - **CORSMiddleware** - includes CORS headers in responses.
@@ -20,4 +18,10 @@ In order to test FastAPI endpoints, the built-in `fastapi.testclient.TestClient`
 Things that should be kept in mind while using middleware components:
 - Middleware should lightweight as it's executed before each request and after each response.
 - Middleware components order matter.
-- Keep middleware documentation up-to-date, so handling requests/responses doesn't look like a magic for newcomers. 
+- Keep middleware documentation up-to-date, so handling requests/responses doesn't look like a magic for newcomers.
+
+How to apply custom logging configuration to Uvicorn: [FastAPI and Uvicorn Logging](https://gist.github.com/liviaerxin/d320e33cbcddcc5df76dd92948e5be3b).
+
+# PoC
+
+## Setup
