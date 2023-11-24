@@ -11,10 +11,10 @@ def create_diff(file1_path: Path, file2_path: Path, result_file_path: Path = Non
     # readlines(hint=-1) - `hint` is the number of maximum bytes/characters that can be read.
     # Values of 0 or less (and None) are treated as no limit.
     file1 = open(file1_path).readlines()
-    logging.debug(f"Read {len(file1)} lines for file {file1_path}")
+    logging.debug(f"Read {len(file1)} lines from file {file1_path}")
 
     file2 = open(file2_path).readlines()
-    logging.debug(f"Read {len(file2)} lines for file {file2_path}")
+    logging.debug(f"Read {len(file2)} lines from file {file2_path}")
 
     if result_file_path:
         # Export results to the given XML file.
