@@ -1,14 +1,20 @@
 import argparse
 import difflib
+import logging
 import sys
 
 from pathlib import Path
 
-MAX_FILE_LINES = 10_000
+logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
 
 def create_diff(file1_path: Path, file2_path: Path, result_file_path: Path = None) -> None:
-    file1 = open(file1_path).readlines(MAX_FILE_LINES)
-    file2 = open(file2_path).readlines(MAX_FILE_LINES)
+    # readlines(hint=-1) - `hint` is the number of maximum bytes/characters that can be read.
+    # Values of 0 or less (and None) are treated as no limit.
+    file1 = open(file1_path).readlines()
+    logging.debug(f"Read {len(file1)} lines for file {file1_path}")
+
+    file2 = open(file2_path).readlines()
+    logging.debug(f"Read {len(file2)} lines for file {file2_path}")
 
     if result_file_path:
         # Export results to the given XML file.
