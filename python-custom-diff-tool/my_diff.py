@@ -24,8 +24,7 @@ def create_diff(file1_path: Path, file2_path: Path, result_file_path: Path = Non
         with open(result_file_path, "w") as result_file:
             result_file.write(delta)
     else:
-        # Display results in STDOUT.
-        # It seems that it doesn't analyza the whole file if it's too large. Check in the docs!
+        # Send results to STDOUT.
         delta = difflib.unified_diff(file1, file2, file1_path.name, file2_path.name)
         sys.stdout.writelines(delta)
 
