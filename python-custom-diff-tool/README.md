@@ -1,0 +1,1 @@
+PoC from the article: [Create Your Own Diff-Tool Using Python](https://florian-dahlitz.de/articles/create-your-own-diff-tool-using-python).
