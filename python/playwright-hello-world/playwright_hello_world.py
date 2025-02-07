@@ -1,6 +1,7 @@
 import argparse
 import sys
 
+# Playwright supports async version as well.
 from playwright.sync_api import sync_playwright
 
 TARGET_URL = "https://projekty.muratordom.pl/"
@@ -28,4 +29,20 @@ if __name__ == "__main__":
 
     with sync_playwright() as playwright:
         engine = getattr(playwright, sanitized_browser_engine_name)
-        print(engine)
+        browser = engine.launch(headless=False)
+        # Create a new isolated context.
+        # It won't share cookies/cache with other browser contexts.
+        context = browser.new_context()
+        
+        page = context.new_page()
+        page.goto(TARGET_URL)
+
+        # The `has_text` parameter searches for a substring (case-insensitive).
+        # >>> page.locator("a", has_text="substring")
+        # If the exact matching is needed, we can use the XPath locator.
+        #   normalize-space -> XPath function that strips leading and trailing white-space characters.
+        link = page.locator("xpath=//a[normalize-space(text())='Projekty domów parterowych']")
+        link.click()
+
+        context.close()
+        browser.close()
