@@ -29,6 +29,7 @@ if __name__ == "__main__":
 
     with sync_playwright() as playwright:
         engine = getattr(playwright, sanitized_browser_engine_name)
+        # If headless=True (defaul), no browser UI is visible.
         browser = engine.launch(headless=False)
         # Create a new isolated context.
         # It won't share cookies/cache with other browser contexts.
@@ -37,12 +38,21 @@ if __name__ == "__main__":
         page = context.new_page()
         page.goto(TARGET_URL)
 
+        # Accept cookies consent if the popup is visible.
+        accept_button = page.locator("button", has_text="Akceptuj")
+        if accept_button.is_visible():
+            accept_button.click()
+
+        # Make the link to projects list visible.
+        top_menu_link = page.locator("css=li.menu-element").get_by_role("link").and_(page.get_by_text("Projekty domów"))
+        top_menu_link.hover()
+
         # The `has_text` parameter searches for a substring (case-insensitive).
         # >>> page.locator("a", has_text="substring")
         # If the exact matching is needed, we can use the XPath locator.
         #   normalize-space -> XPath function that strips leading and trailing white-space characters.
-        link = page.locator("xpath=//a[normalize-space(text())='Projekty domów parterowych']")
-        link.click()
+        projects_link = page.locator("xpath=//a[normalize-space(text())='Projekty domów parterowych']")
+        projects_link.click()
 
         context.close()
         browser.close()
