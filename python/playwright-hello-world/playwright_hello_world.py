@@ -34,7 +34,7 @@ if __name__ == "__main__":
         # Create a new isolated context.
         # It won't share cookies/cache with other browser contexts.
         context = browser.new_context()
-        
+
         page = context.new_page()
         page.goto(TARGET_URL)
 
@@ -44,15 +44,30 @@ if __name__ == "__main__":
             accept_button.click()
 
         # Make the link to projects list visible.
-        top_menu_link = page.locator("css=li.menu-element").get_by_role("link").and_(page.get_by_text("Projekty domów"))
+        top_menu_link = (
+            page.locator("css=li.menu-element")
+            .get_by_role("link")
+            .and_(page.get_by_text("Projekty domów"))
+        )
         top_menu_link.hover()
 
         # The `has_text` parameter searches for a substring (case-insensitive).
         # >>> page.locator("a", has_text="substring")
         # If the exact matching is needed, we can use the XPath locator.
         #   normalize-space -> XPath function that strips leading and trailing white-space characters.
-        projects_link = page.locator("xpath=//a[normalize-space(text())='Projekty domów parterowych']")
+        projects_link = page.locator(
+            "xpath=//a[normalize-space(text())='Projekty domów parterowych']"
+        )
         projects_link.click()
+
+        # Go to the first project on the list.
+        first_project_teaser = (
+            page.locator("css=div.filters-results__container__slots")
+            .locator("css=div.filters_result_teaser")
+            .first
+        )
+        first_project_link = first_project_teaser.get_by_role("link").first
+        first_project_link.click()
 
         context.close()
         browser.close()
