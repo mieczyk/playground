@@ -39,7 +39,7 @@ if __name__ == "__main__":
         page.goto(TARGET_URL)
 
         # Accept cookies consent if the popup is visible.
-        accept_button = page.locator("button", has_text="Akceptuj")
+        accept_button = page.locator("css=div.placeholder_overlay")
         if accept_button.is_visible():
             accept_button.click()
 
