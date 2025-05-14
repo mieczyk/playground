@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import List
 import click
 
 
@@ -48,6 +49,30 @@ def ls_with_path_type(path: Path) -> None:
     __print_dir_content(path)
 
 
+@click.command()
+@click.argument(
+    "paths",
+    type=click.Path(exists=True, file_okay=False, readable=True, path_type=Path),
+    # Sets the number of arguments.
+    # If set to -1 we can pass undetermined number of arguments.
+    # With nargs=-1 we cannot set the default value: https://github.com/pallets/click/issues/390
+    nargs=-1,
+)
+def ls_with_variadic_arguments(paths: List[Path]) -> None:
+    """List directories and files in given PATHS.
+
+    If no PATH given, the default dir is '.'
+    """
+    if len(paths) < 1:
+        paths = [Path(".")]
+
+    # Built-in function `enumerate` returns enumerate object with counter (starting with 0).
+    for idx, path in enumerate(paths):
+        click.echo(click.style(f"{path}:" if idx == 0 else f"\n{path}:", fg="blue"))
+        __print_dir_content(path)
+
+
 if __name__ == "__main__":
     # ls()
-    ls_with_path_type()
+    # ls_with_path_type()
+    ls_with_variadic_arguments()
