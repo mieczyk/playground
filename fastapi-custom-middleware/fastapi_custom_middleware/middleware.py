@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 # Class-based middleware responsible for rate limiting.
-# It checks how many requests have been made from a sepific IP within a specific period
+# It checks how many requests have been made from a specific IP within a given period
 # and rejects further requests if the limit is exceeded.
 class RateLimitMiddleware(BaseHTTPMiddleware):
     # Allow max 10 requests per second.
