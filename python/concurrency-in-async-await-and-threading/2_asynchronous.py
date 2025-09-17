@@ -1,6 +1,6 @@
 import asyncio
-import time
 
+from utils import measure_execution_time
 
 async def make_burger(order_num: int) -> None:
     print(f"Preparing burger #{order_num}...")
@@ -17,9 +17,6 @@ async def main():
     await asyncio.gather(*order_queue)
 
 if __name__ == "__main__":
-    start = time.perf_counter()
-    asyncio.run(main())
-    elapsed = time.perf_counter() - start
-
     # Should take ~5 seconds. The `make_burger` coroutines are working concurrently.
-    print(f"Orders completed in {elapsed:0.2f} seconds.")
+    with measure_execution_time():
+        asyncio.run(main())

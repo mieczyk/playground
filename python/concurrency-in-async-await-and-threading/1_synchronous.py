@@ -1,5 +1,7 @@
 import time
 
+from utils import measure_execution_time
+
 def make_burger(order_num: int) -> None:
     print(f"Preparing burger #{order_num}...")
     time.sleep(5) # Blocking operation
@@ -12,9 +14,6 @@ def main():
 
 
 if __name__ == "__main__":
-    start = time.perf_counter()
-    main()
-    elapsed = time.perf_counter() - start
-
     # Each task is performed synchronously, so it will take ~15 seconds.
-    print(f"Orders completed in {elapsed:0.2f} seconds.")
+    with measure_execution_time():
+        main()
