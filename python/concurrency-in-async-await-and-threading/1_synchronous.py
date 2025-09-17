@@ -16,4 +16,5 @@ if __name__ == "__main__":
     main()
     elapsed = time.perf_counter() - start
 
+    # Each task is performed synchronously, so it will take ~15 seconds.
     print(f"Orders completed in {elapsed:0.2f} seconds.")
