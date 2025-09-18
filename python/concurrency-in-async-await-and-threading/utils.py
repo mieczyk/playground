@@ -1,6 +1,7 @@
 from contextlib import contextmanager
 import time
 
+
 @contextmanager
 def measure_execution_time():
     start = time.perf_counter()

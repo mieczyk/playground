@@ -2,9 +2,10 @@ import time
 
 from utils import measure_execution_time
 
+
 def make_burger(order_num: int) -> None:
     print(f"Preparing burger #{order_num}...")
-    time.sleep(5) # Blocking operation
+    time.sleep(5)  # Blocking operation
     print(f"Burger made #{order_num}")
 
 
