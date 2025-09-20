@@ -1,85 +1,65 @@
 import asyncio
+from utils import measure_execution_time
 
-import time
+# dish_name: preparation_time_in_seconds
+DISHES = {"burger": 5, "fries": 2, "fish": 10, "pizza": 6}
+SELECT_DISH_PROMPT = f"What would you like to order ({'|'.join(DISHES.keys())})?"
 
-task_queue = asyncio.Queue()
 
-order_num = 0
+orders = asyncio.Queue()
 
-async def take_order():
-   global order_num
-   order_num += 1
-   
-   print(f"Order burger and fries for order #{order_num:04d}:")
-   
-   burger_num = await asyncio.to_thread(input, "Number of burgers:")
-   for i in range(int(burger_num)):
-       await task_queue.put(make_burger(f"{order_num:04d}-burger{i:02d}"))
-   
-   fries_num = await asyncio.to_thread(input, "Number of fries:")
-   for i in range(int(fries_num)):
-       await task_queue.put(make_fries(f"{order_num:04d}-fries{i:02d}"))
-   
-   print(f"Order #{order_num:04d} queued.")
-   
-   await task_queue.put(take_order())
 
-async def make_burger(order_num):
+def is_dish_in_menu(dish_name: str) -> bool:
+    return dish_name in DISHES.keys()
 
-   print(f"Preparing burger #{order_num}...")
-
-   await asyncio.sleep(5)  # time for making the burger
-
-   print(f"Burger made #{order_num}")
-
-async def make_fries(order_num):
-
-   print(f"Preparing fries #{order_num}...")
-
-   await asyncio.sleep(2)  # time for making fries
-
-   print(f"Fries made #{order_num}")
 
 class Staff:
+    def __init__(self, name: str):
+        self.name = name
 
-   def __init__(self, name):
+    async def prepare_ordered_meal(self) -> None:
+        while True:
+            # If the orders queue is empty, it'll wait for the first element.
+            dish_name = await orders.get()
 
-       self.name = name
+            if not is_dish_in_menu(dish_name):
+                break
 
-   async def working(self):
+            preparation_time_in_seconds = DISHES[dish_name]
+            print(
+                f"[{self.name}] Preparing {dish_name}. Will take {preparation_time_in_seconds} s..."
+            )
+            await asyncio.sleep(preparation_time_in_seconds)
+            print(f"[{self.name}] {dish_name} is ready!")
+        print(f"Preparing meals finished by {self.name}!")
 
-       while True:
 
-           if task_queue.qsize() > 0:
+async def take_orders(workers_number: int) -> None:
+    while True:
+        dish_name = await asyncio.to_thread(input, SELECT_DISH_PROMPT)
+        if is_dish_in_menu(dish_name):
+            orders.put_nowait(dish_name)
+        else:
+            # A little trick that puts a message to the queue for ALL running workers, so they all can stop working.
+            # If we put only a single "stopper" message to the queue, only the first worker that reads the message will stop working.
+            # Others will waiting forever for new orders in the queue.
+            for _ in range(workers_number):
+                orders.put_nowait("exit")
+            break
+    print("The kitchen is closed now!")
 
-               print(f"{self.name} is working...")
 
-               task = await task_queue.get()
+async def main() -> None:
+    john = Staff("John")
+    jane = Staff("Jane")
 
-               await task
+    # Run all awaitable objects passed to the method *concurrently* and waits
+    # untill all tasks are done.
+    await asyncio.gather(
+        take_orders(2), john.prepare_ordered_meal(), jane.prepare_ordered_meal()
+    )
 
-               print(f"{self.name} finish task...")
-
-           else:
-
-               await asyncio.sleep(1) #rest
-
-async def main():
-
-   task_queue.put_nowait(take_order())
-
-   staff1 = Staff(name="John")
-
-   staff2 = Staff(name="Jane")
-
-   await asyncio.gather(staff1.working(), staff2.working())
 
 if __name__ == "__main__":
-
-   s = time.perf_counter()
-
-   asyncio.run(main())
-
-   elapsed = time.perf_counter() - s
-
-   print(f"Orders completed in {elapsed:0.2f} seconds.")
+    with measure_execution_time():
+        asyncio.run(main())
