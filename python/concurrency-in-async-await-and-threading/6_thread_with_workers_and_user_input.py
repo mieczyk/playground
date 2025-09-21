@@ -1,175 +1,90 @@
-def working():
-
-   while True:
-
-       with queue_lock:
-
-           if len(order_queue) == 0:
-
-               return
-
-           else:
-
-               task = order_queue.pop(0)
-
-       print(f"{threading.current_thread().name} is working...")
-
-       task()
-
-       print(f"{threading.current_thread().name} finish task...")
-
-```
-
-Based on what we have learned so far, we can complete our final code with threading like this:
-
-```
-
-import logging
-
 import threading
-
 import time
+from utils import LOG_FILE_NAME, get_logger, measure_execution_time
 
-logger = logging.getLogger(__name__)
+# dish_name: preparation_time_in_seconds
+DISHES = {"burger": 5, "fries": 2, "fish": 10, "pizza": 6}
+SELECT_DISH_PROMPT = f"What would you like to order ({'|'.join(DISHES.keys())})? "
 
-logging.basicConfig(filename="pyburger_threads.log", level=logging.INFO)
+logger = get_logger(__file__)
 
+# Resource with protected access (lock) containing ordered dishes to prepare.
+orders_queue = []
+
+# Flag determining if staff tasks (preparing meals) should be stopped.
+kitchen_open = True
+
+# To avoid race conditions, the tasks queue access should be protected
+# by threads synchronization mechnisms (e.g. simple lock).
 queue_lock = threading.Lock()
 
-task_queue = []
 
-order_num = 0
+class Staff:
+    def __init__(self, name: str):
+        self.name = name
 
-closing = False
+    def prepare_ordered_meal(self) -> None:
+        while True:
+            dish_name = None
+            with queue_lock:
+                if len(orders_queue) == 0:
+                    if not kitchen_open:
+                        break
+                else:
+                    dish_name = orders_queue.pop(0)
 
-def take_order():
+            if dish_name is not None:
+                self.__cook_the_dish(dish_name)
+            else:
+                time.sleep(1)  # Wait for an order.
 
-   global order_num, closing
+        logger.info(f"Preparing meals finished by {self.name}!")
 
-   try:
+    def __cook_the_dish(self, dish_name: str) -> None:
+        preparation_time_in_seconds = DISHES[dish_name]
+        logger.info(
+            f"[{self.name}] Preparing {dish_name}. Will take {preparation_time_in_seconds} s..."
+        )
+        time.sleep(preparation_time_in_seconds)
+        logger.info(f"[{self.name}] {dish_name} is ready!")
 
-       order_num += 1
 
-       logger.info(f"Taking Order #{order_num:04d}...")
+def take_orders():
+    # We need to explicitly mark the variable as global if we want to change its value
+    # inside a function.
+    global kitchen_open
+    while True:
+        dish_name = input(SELECT_DISH_PROMPT)
+        if dish_name in DISHES.keys():
+            with queue_lock:
+                orders_queue.append(dish_name)
+            logger.info(f"Ordered: {dish_name}")
+        else:
+            kitchen_open = False
+            break
+    logger.info("The kitchen is closed now! No more orders will be accepted.")
 
-       print(f"Order burger and fries for order #{order_num:04d}:")
-
-       burger_num = input("Number of burgers:")
-
-       for i in range(int(burger_num)):
-
-           with queue_lock:
-
-               task_queue.append(make_burger(f"{order_num:04d}-burger{i:02d}"))
-
-       fries_num = input("Number of fries:")
-
-       for i in range(int(fries_num)):
-
-           with queue_lock:
-
-               task_queue.append(make_fries(f"{order_num:04d}-fries{i:02d}"))
-
-       logger.info(f"Order #{order_num:04d} queued.")
-
-       print(f"Order #{order_num:04d} queued, please wait.")
-
-       with queue_lock:
-
-           task_queue.append(take_order)
-
-   except ValueError:
-
-       print("Goodbye!")
-
-       logger.info("Closing down... stop taking orders and finish all tasks.")
-
-       closing = True
-
-def make_burger(order_num):
-
-   def making_burger():
-
-       logger.info(f"Preparing burger #{order_num}...")
-
-       time.sleep(5)  # time for making the burger
-
-       logger.info(f"Burger made #{order_num}")
-
-   return making_burger
-
-def make_fries(order_num):
-
-   def making_fries():
-
-       logger.info(f"Preparing fried #{order_num}...")
-
-       time.sleep(2)  # time for making fries
-
-       logger.info(f"Fries made #{order_num}")
-
-   return making_fries
-
-def working():
-
-   while True:
-
-       with queue_lock:
-
-           if len(task_queue) == 0:
-
-               if closing:
-
-                   return
-
-               else:
-
-                   task = None
-
-           else:
-
-               task = task_queue.pop(0)
-
-       if task:
-
-           logger.info(f"{threading.current_thread().name} is working...")
-
-           task()
-
-           logger.info(f"{threading.current_thread().name} finish task...")
-
-       else:
-
-           time.sleep(1)  # rest
 
 def main():
+    waiter_task = threading.Thread(target=take_orders, name="Waiter")
+    waiter_task.start()
 
-   print("Welcome to Pyburger!")
+    john = Staff("John")
+    john_task = threading.Thread(target=john.prepare_ordered_meal, name="John")
+    john_task.start()
 
-   logger.info("Ready for business!")
+    jane = Staff("Jane")
+    jane_task = threading.Thread(target=jane.prepare_ordered_meal, name="Jane")
+    jane_task.start()
 
-   task_queue.append(take_order)
+    # Wait for all tasks to finish
+    waiter_task.join()
+    john_task.join()
+    jane_task.join()
 
-   staff1 = threading.Thread(target=working, name="John")
+    print(f"Check the {LOG_FILE_NAME} file for ordered meals list.")
 
-   staff1.start()
-
-   staff2 = threading.Thread(target=working, name="Jane")
-
-   staff2.start()
-
-   staff1.join()
-
-   staff2.join()
-
-   logger.info("All tasks finished. Closing now.")
 
 if __name__ == "__main__":
-
-   s = time.perf_counter()
-
-   main()
-
-   elapsed = time.perf_counter() - s
-
-   logger.info(f"Orders completed in {elapsed:0.2f} seconds.")
+    with measure_execution_time():
+        main()
