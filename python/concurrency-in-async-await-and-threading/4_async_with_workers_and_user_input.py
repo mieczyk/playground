@@ -1,15 +1,11 @@
 import asyncio
-import logging
-import os
-from utils import measure_execution_time
+from utils import get_logger, measure_execution_time, LOG_FILE_NAME
 
 # dish_name: preparation_time_in_seconds
 DISHES = {"burger": 5, "fries": 2, "fish": 10, "pizza": 6}
 SELECT_DISH_PROMPT = f"What would you like to order ({'|'.join(DISHES.keys())})? "
 
-LOG_FILE_NAME = "orders.log"
-logger = logging.getLogger(os.path.basename(__file__))
-logging.basicConfig(filename=LOG_FILE_NAME, level=logging.INFO)
+logger = get_logger(__file__)
 
 orders = asyncio.Queue()
 
