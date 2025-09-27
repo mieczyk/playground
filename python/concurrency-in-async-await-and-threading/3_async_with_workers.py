@@ -18,7 +18,7 @@ class Staff:
 class Kitchen:
     def __init__(self, max_orders_count: int):
         # `asyncio.Queue`` jest designed to work with async/await code.
-        # If the queue is full, `await put()` block the code execution until an item is removed by `get()`.
+        # If the queue is full, `await put()` blocks the code execution until an item is removed by `get()`.
         # If the queue is empty, `await get()` waits until an element is added to the queue by `put()`.
         # There are also non-blocking operaionts available:
         #   * `put_nowait()` - raises `QueueFull` if the queue is full.
