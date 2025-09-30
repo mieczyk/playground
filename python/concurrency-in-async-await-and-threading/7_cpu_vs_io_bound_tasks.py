@@ -1,7 +1,9 @@
 from argparse import ArgumentParser
 import asyncio
+from typing import List
 import httpx
 import time
+import random
 from enum import Enum
 from utils import measure_execution_time
 
@@ -12,7 +14,6 @@ class TaskType(str, Enum):
 
 
 class IOBound:
-    # httpbin.org is an HTTP test server.
     TEST_URL = "https://vilya.pl/"
     COUNT = 10
 
@@ -37,8 +38,26 @@ class IOBound:
 
 
 class CPUBound:
+    TEST_IMG_SIZE = (128, 64)
+
+    def __init__(self):
+        random.seed(42)
+        self._img = self.__generate_test_img()
+
+    def __generate_test_img(self) -> List[List[List]]:
+        img = []
+        width, height = self.TEST_IMG_SIZE
+        for _ in range(height):
+            row = []
+            for _ in range(width):
+                # Using list, so the value can be modified later.
+                pixel_rgb = [random.randint(0, 255) for _ in range(3)]
+                row.append(pixel_rgb)
+            img.append(row)
+        return img
+
     def calculate_something(self):
-        pass
+        print(self._img)
 
     async def calculate_something_async(self):
         pass
