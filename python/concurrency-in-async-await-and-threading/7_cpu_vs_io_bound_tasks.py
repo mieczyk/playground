@@ -7,6 +7,8 @@ import random
 from enum import Enum
 from utils import measure_execution_time
 
+from PIL import Image
+
 
 class TaskType(str, Enum):
     cpu = "cpu"
@@ -38,7 +40,7 @@ class IOBound:
 
 
 class CPUBound:
-    TEST_IMG_SIZE = (128, 64)
+    TEST_IMG_SIZE = (1960, 1080)
 
     def __init__(self):
         random.seed(42)
@@ -50,17 +52,30 @@ class CPUBound:
         for _ in range(height):
             row = []
             for _ in range(width):
-                # Using list, so the value can be modified later.
+                # Using a list, so the value can be modified later.
                 pixel_rgb = [random.randint(0, 255) for _ in range(3)]
                 row.append(pixel_rgb)
             img.append(row)
         return img
 
-    def calculate_something(self):
-        print(self._img)
+    def convert_to_grayscale(self):
+        for row in self._img:
+            for pixel in row:
+                self.__convert_pixel_to_grayscale(pixel)
 
-    async def calculate_something_async(self):
+    async def convert_to_grayscale_async(self):
         pass
+
+    def __convert_pixel_to_grayscale(self, pixel_rgb: list) -> None:
+        new_value = round(sum(pixel_rgb) / len(pixel_rgb))
+        for i, _ in enumerate(pixel_rgb):
+            pixel_rgb[i] = new_value
+
+    def display_image(self) -> None:
+        flat_pixels = [tuple(pixel) for row in self._img for pixel in row]
+        img = Image.new("RGB", self.TEST_IMG_SIZE)
+        img.putdata(flat_pixels)
+        img.show()
 
 
 def main(task_type: TaskType) -> None:
@@ -70,7 +85,9 @@ def main(task_type: TaskType) -> None:
         task.download_pages()
     else:
         task = CPUBound()
-        task.calculate_something()
+        task.display_image()
+        task.convert_to_grayscale()
+        task.display_image()
 
 
 async def main_async(task_type: TaskType) -> None:
@@ -80,7 +97,7 @@ async def main_async(task_type: TaskType) -> None:
         await task.download_pages_async()
     else:
         task = CPUBound()
-        await task.calculate_something_async()
+        await task.convert_to_grayscale_async()
 
 
 if __name__ == "__main__":
