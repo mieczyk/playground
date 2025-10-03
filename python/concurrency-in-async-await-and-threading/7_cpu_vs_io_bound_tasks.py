@@ -7,8 +7,6 @@ import random
 from enum import Enum
 from utils import measure_execution_time
 
-from PIL import Image
-
 
 class TaskType(str, Enum):
     cpu = "cpu"
@@ -16,8 +14,8 @@ class TaskType(str, Enum):
 
 
 class IOBound:
-    TEST_URL = "https://vilya.pl/"
-    COUNT = 10
+    TEST_URL = "https://github.com"
+    COUNT = 20
 
     def download_pages(self) -> None:
         with httpx.Client() as client:
@@ -41,14 +39,27 @@ class IOBound:
 
 class CPUBound:
     TEST_IMG_SIZE = (1960, 1080)
+    COUNT = 2
 
     def __init__(self):
         random.seed(42)
-        self._img = self.__generate_test_img()
 
-    def __generate_test_img(self) -> List[List[List]]:
+    def generate_images(self) -> None:
+        for _ in range(self.COUNT):
+            self.__generate_random_img_and_convert_to_grayscale()
+
+    async def generate_images_async(self) -> None:
+        tasks = [
+            asyncio.to_thread(self.__generate_random_img_and_convert_to_grayscale)
+            for _ in range(self.COUNT)
+        ]
+        await asyncio.gather(*tasks)
+
+    def __generate_random_img_and_convert_to_grayscale(self) -> None:
         img = []
         width, height = self.TEST_IMG_SIZE
+
+        print(f"Generating random image: {self.TEST_IMG_SIZE}")
         for _ in range(height):
             row = []
             for _ in range(width):
@@ -56,26 +67,21 @@ class CPUBound:
                 pixel_rgb = [random.randint(0, 255) for _ in range(3)]
                 row.append(pixel_rgb)
             img.append(row)
-        return img
 
-    def convert_to_grayscale(self):
-        for row in self._img:
+        print("Random image generated. Converting to grayscale...")
+        self.__convert_to_grayscale(img)
+
+        print("Converted.")
+
+    def __convert_to_grayscale(self, img: List[List[List]]) -> None:
+        for row in img:
             for pixel in row:
                 self.__convert_pixel_to_grayscale(pixel)
-
-    async def convert_to_grayscale_async(self):
-        pass
 
     def __convert_pixel_to_grayscale(self, pixel_rgb: list) -> None:
         new_value = round(sum(pixel_rgb) / len(pixel_rgb))
         for i, _ in enumerate(pixel_rgb):
             pixel_rgb[i] = new_value
-
-    def display_image(self) -> None:
-        flat_pixels = [tuple(pixel) for row in self._img for pixel in row]
-        img = Image.new("RGB", self.TEST_IMG_SIZE)
-        img.putdata(flat_pixels)
-        img.show()
 
 
 def main(task_type: TaskType) -> None:
@@ -85,9 +91,7 @@ def main(task_type: TaskType) -> None:
         task.download_pages()
     else:
         task = CPUBound()
-        task.display_image()
-        task.convert_to_grayscale()
-        task.display_image()
+        task.generate_images()
 
 
 async def main_async(task_type: TaskType) -> None:
@@ -97,7 +101,7 @@ async def main_async(task_type: TaskType) -> None:
         await task.download_pages_async()
     else:
         task = CPUBound()
-        await task.convert_to_grayscale_async()
+        await task.generate_images_async()
 
 
 if __name__ == "__main__":
