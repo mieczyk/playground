@@ -1,4 +1,6 @@
 .obsidian
 .tool-versions
+.ruff_cache
 venv
 __pycache__
+*.log
