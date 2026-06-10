@@ -10,10 +10,11 @@
 
 from celery import Celery
 
-task_routes = {"poc.*": {"queue": "poc"}}
-
 sender_app = Celery("sender_app", broker="amqp://guest@localhost//")
+sender_app.conf.task_routes = {"poc.*": {"queue": "poc"}}
+
 handler_app = Celery("handler_app", broker="amqp://guest@localhost//")
+handler_app.conf.task_default_queue = "poc"
 
 @handler_app.task(name="poc.make_coffee")
 def make_coffee(coffe_type: str):
