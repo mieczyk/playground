@@ -1,5 +1,5 @@
 # PoC that shows whether a Celery task fails if called with additional, unexpected argument.
-# * The `poc.make_coffee` task fails as it doesn't expect any other params that `coffee_type`.
+# * The `poc.make_coffee` task fails as it doesn't expect any other params than `coffee_type`.
 # * The `poc.make_tea` task succeeds as it accepts variable number of keyword arguments (**kwargs).
 
 # Run the handler worker:
