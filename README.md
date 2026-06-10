@@ -4,6 +4,7 @@ All my personal IT notes and proof-of-concept projects.
 
 ## Python
 
+- [Celery: unexpected task argument](python/celery-task-unexpected-argument)
 - [CLI with Click](python/cli-click)
 - [Concurrency in async/await and threading](python/concurrency-in-async-await-and-threading)
 - [FastAPI custom middleware](fastapi-custom-middleware)
